@@ -368,6 +368,7 @@ def leverrier_iter(t: Tensor) -> Tuple[List[FieldType], Optional[Tensor]]:
         if co == Z.zero_entry:
             o.append(co)
         else:
+            # TODO: Iteration fails in a prime field when (1+k) % p = 0
             o.append(-((1+k)*(co**-1))**-1)
         if k + 1 == t.shape[0]:
             ti = None
@@ -390,7 +391,7 @@ def slow_inverse(t: Tensor) -> Optional[Tensor]:
     return leverrier_iter(t)[1]
 
 
-def gaussian_elimination(t: Tensor) -> Tuple[List[int], List[int], Tensor, Tensor, int]:
+def gaussian_elimination(t: Tensor, row_pivot=True, col_pivot=True) -> Tuple[List[int], List[int], Tensor, Tensor, int]:
     """
     Gaussian eliminination. To recover inverse from the permuted inverse,
     rotate the rows: the actual i-th row row is located pcol[prow[i]]
@@ -412,8 +413,8 @@ def gaussian_elimination(t: Tensor) -> Tuple[List[int], List[int], Tensor, Tenso
     while n_left < min(t.shape[0], t.shape[1]):
         # Find pivot
         pivot_not_found = True
-        for r_pivot in range(n_left, t.shape[0]):
-            for c_pivot in range(n_left, t.shape[1]):
+        for r_pivot in range(n_left, (t.shape[0] if row_pivot else (1+n_left))):
+            for c_pivot in range(n_left, (t.shape[1] if col_pivot else (1+n_left))):
                 if t2[prow[r_pivot], pcol[c_pivot]] != t.zero_entry:
                     pivot_not_found = False
                     if r_pivot > n_left:
@@ -445,6 +446,20 @@ def gaussian_elimination(t: Tensor) -> Tuple[List[int], List[int], Tensor, Tenso
 
         n_left += 1
     return prow, pcol, t2, i2, n_left
+
+
+def inverse(t: Tensor) -> Optional[Tensor]:
+    if t.shape[0] != t.shape[1]:
+        return None
+    prow, pcol, red, ti, ra = gaussian_elimination(t, row_pivot=True, col_pivot=False)
+    if ra < t.shape[0]:
+        return None
+    i = []
+    for r in range(t.shape[0]):
+        for c in range(t.shape[1]):
+            i.append(ti[prow[r], pcol[c]])
+    o = Tensor(i, shape=(len(prow), len(pcol)), entry_type=t.entry_type)
+    return o
 
 
 def gram_schmidt_ortho(t: Tensor) -> Optional[Tensor]:
