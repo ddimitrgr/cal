@@ -75,7 +75,7 @@ class Group:
         return efficient_pow(o, abs(power))
 
     def __truediv__(self, other):
-        raise self.__mul__(self.__pow__(-1))
+        return self.__mul__(other.__pow__(-1))
 
 
 class Ring:
@@ -232,8 +232,11 @@ class Q(Field):
     def __init__(self, *args):
         self._fraction: Fraction = args[0] if (len(args) == 1) else Fraction(args[0], args[1])
 
+    def __hash__(self):
+        return hash(self._fraction)
+
     def __eq__(self, other):
-        return self._fraction == other._fraction
+        return type(other) is type(self) and self._fraction == other._fraction
 
     def invert(self) -> "Field":
         return type(self)(Fraction.__truediv__(Fraction(1, 1), self._fraction))
@@ -279,7 +282,7 @@ class IntegerQuotientRing(EuclideanDomain):
 
     @property
     def value(self) -> int:
-        return self.value()
+        return self._value
 
     def __hash__(self):
         return hash((self._value, self.m))
@@ -288,7 +291,7 @@ class IntegerQuotientRing(EuclideanDomain):
         return str(self._value)
 
     def __divmod__(self, other):
-        raise divmod(self._value, self.m)
+        return divmod(self._value, self.m)
 
     def __add__(self, other):
         return self.__class__((self._value + other._value) % self.m)

@@ -98,9 +98,6 @@ class PolyField(Field):
     def __getitem__(self, item):
         return self._poly[item]
 
-    def __setitem__(self, key, value):
-        self._poly[key] = value
-
     ####################################################################################
 
     def __add__(self, other):
@@ -123,10 +120,10 @@ class PolyField(Field):
         if self._poly.is_zero():
             raise Exception("Division by 0 !")
         inv_self_poly, _, gcd = ext_euclid_algo(self._poly, self.irreducible_poly)
-        cast(Poly, inv_self_poly).normalize(cast(Poly, gcd).coefficient_list[0])
         if gcd.rank() != 1:
             raise Exception("Extended euclidean division fail !")
-        return type(self)(cast(Poly, inv_self_poly).coefficient_list)
+        inv_self_poly = cast(Poly, inv_self_poly).normalize(cast(Poly, gcd).coefficient_list[0])
+        return type(self)(inv_self_poly.coefficient_list)
 
 
 def is_poly_root(poly: Poly, root: PolyField) -> bool:

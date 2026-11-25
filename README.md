@@ -11,7 +11,7 @@ pip install git+https://github.com/ddimitrgr/cal.git@master
 For example to calculate the character table for the quartenion group:
 
 ```python
-import cal.GroupAsTable
+from cal import GroupAsTable
 
 QuartenionMultTable = [
     ['E', 'EM', 'I', 'IM', 'J', 'JM', 'K', 'KM'],
@@ -48,7 +48,7 @@ Cyclic5MultTable = [
     ['A4', 'E', 'A', 'A2', 'A3']
 ]
 
-GroupAsTable.create(Cyclic5Table).print_characters()
+GroupAsTable.create(Cyclic5MultTable).print_characters()
 ```
 
 and we obtain the characters in terms of algebraic numbers:

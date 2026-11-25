@@ -1,7 +1,6 @@
 from typing import List
 from fractions import Fraction
 from cal.base import FieldType, Ring, EuclideanDomainMixin
-from cal.decorators import writer
 
 
 class PolyRing(Ring):
@@ -25,9 +24,9 @@ class PolyRing(Ring):
         NewPolyType.zero = NewPolyType([])
         return NewPolyType
 
-    @writer
     def __init__(self, coeff: List[FieldType]):
         self._coeff: List[FieldType] = []
+        self._hash = None
         for i, c in enumerate(reversed(coeff)):
             if c != self.zero_coeff:
                 self._coeff = coeff[:-i] if (i > 0) else coeff
@@ -45,24 +44,21 @@ class PolyRing(Ring):
     def is_zero(self) -> bool:
         return len(self._coeff) == 0
 
-    @writer
     def normalize(self, c: FieldType) -> "Poly":
-        for i in range(len(self)):
-            self._coeff[i] = self._coeff[i] * c**-1
-        return self
+        ci = c**-1
+        return type(self)([x * ci for x in self._coeff])
 
-    @writer
     def make_monic(self) -> "Poly":
-        return self if self.is_zero() else self.normalize(self._coeff[-1])
+        return self if (self.is_zero() or self._coeff[-1] == self.unit_coeff) else self.normalize(self._coeff[-1])
+
+    def degree(self) -> int:
+        return len(self._coeff) - 1
 
     def __len__(self):
         return len(self._coeff)
 
     def __getitem__(self, key):
         return self._coeff[key]
-
-    def __setitem__(self, key, value):
-        self._coeff[key] = value
 
     def __str__(self):
         if self.is_zero():

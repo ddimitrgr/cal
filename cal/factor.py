@@ -45,7 +45,7 @@ def square_free_poly_decomposition_in_q(p: Poly) -> Dict[Poly, int]:
             dd.append(c - b.derivative())
     for e_min1, f in enumerate(aa[1:]):
         if len(f) > 1:
-            f.make_monic()
+            f = f.make_monic()
             poly_index[f] = e_min1+1
     return poly_index
 
@@ -54,13 +54,13 @@ def square_free_poly_decomposition_in_finite_field(p: Poly) -> Dict[Poly, int]:
     factor_to_mult_map: Dict[Poly, int] = dict()
     p.derivative()
     _, _, c = ext_euclid_algo(p, p.derivative())
-    c.make_monic()
+    c = c.make_monic()
     w: Poly = p//c
 
     i = 1
     while len(w) > 1:
         _, _, y = ext_euclid_algo(w, c)
-        y.make_monic()
+        y = y.make_monic()
         f, w, c = w//y, y, c//y
         factor_to_mult_map[f] = i
         i += 1
@@ -153,7 +153,7 @@ def factor_poly_in_prime_field(p: Poly) -> Dict[Poly, int]:
             ftrial = f - P([c])
             if not ftrial.is_zero():
                 _, _, gcd = ext_euclid_algo(p_remain, ftrial)
-                gcd.make_monic()
+                gcd = gcd.make_monic()
                 if len(gcd) > 1:
                     p_remain = p_remain // gcd
                     if gcd not in factors:
@@ -166,7 +166,7 @@ def factor_poly_in_prime_field(p: Poly) -> Dict[Poly, int]:
                 ftrial = f - P([c])
                 if not ftrial.is_zero():
                     _, _, gcd = ext_euclid_algo(p_remain, ftrial)
-                    gcd.make_monic()
+                    gcd = gcd.make_monic()
                     if len(gcd) > 1:
                         p_remain = p_remain // gcd
                         if gcd not in factors:

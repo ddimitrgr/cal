@@ -165,6 +165,28 @@ class GroupAsTable(Group):
     def invert(self) -> "GroupAsTable":
         return type(self)(self.inverses[self._sym])
 
+    def __eq__(self, other):
+        return type(other) is type(self) and other._sym == self._sym
+
+    def __hash__(self):
+        return hash((type(self), self._sym))
+
+    @classmethod
+    def has_member(cls, item: "GroupAsTable") -> bool:
+        return isinstance(item, cls) and (item.sym in cls.symbol_to_loc)
+
+    @classmethod
+    def over_elements(cls):
+        return (cls(s) for s in cls.loc_to_symbol)
+
+    @classmethod
+    def elements(cls) -> Set["GroupAsTable"]:
+        return set(cls.over_elements())
+
+    @classmethod
+    def size(cls):
+        return len(cls.symbol_to_loc)
+
     @classmethod
     def print_classes(cls):
         m = max([len(rep) for rep in cls.classes])
@@ -479,7 +501,7 @@ C3vMultTable = [
     ['I', 'a', 'b', 'c', 'd', 'e'],
     ['a', 'b', 'I', 'd', 'e', 'c'],
     ['b', 'I', 'a', 'e', 'c', 'd'],
-    ['c', 'd', 'd', 'I', 'b', 'a'],
+    ['c', 'e', 'd', 'I', 'b', 'a'],
     ['d', 'c', 'e', 'a', 'I', 'b'],
     ['e', 'd', 'c', 'b', 'a', 'I'],
 ]

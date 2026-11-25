@@ -15,7 +15,7 @@ class TestPoly(unittest.TestCase):
         self.assertTrue(type(p1.zero) == P)
         self.assertTrue(type(P.zero) == P)
 
-        p1.make_monic()
+        p1 = p1.make_monic()
         divmod(p1, p2)
         p1 * p2
         p1 + p2 + p1*p2

@@ -14,6 +14,8 @@ def prod(li: Sequence[int]) -> List[int]:
 
 class Tensor:
 
+    __hash__ = None
+
     @classmethod
     def Identity(cls, shape: Sequence[int], entry_type: type=Fraction) -> "Tensor":
         I = cls(shape=shape, entry_type=entry_type)
@@ -90,11 +92,11 @@ class Tensor:
                 # Fill linear buffer
                 self._buffer = [self.zero_entry]*prod(shape)[-1]
 
-    def __hash__(self):
-        return hash((tuple(self._shape), tuple(self._buffer)))
-
     def __eq__(self, other):
-        return hash(self) == hash(other)
+        if not isinstance(other, Tensor):
+            return NotImplemented
+        return self.shape == other.shape and all(
+            self.g(i) == other.g(j) for i, j in zip(self.idx(), other.idx()))
 
     def copy(self) -> "Tensor":
         cp = Tensor(deepcopy(self._buffer), entry_type=self.entry_type, shape=self.shape)
