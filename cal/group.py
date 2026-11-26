@@ -59,23 +59,22 @@ class GroupAsTable(Group):
             if sym not in symbol_to_class_rep:
                 # classify
                 for c in range(len(table)):
-                    if c != loc:
-                        prod_idx = table[c][loc]
-                        final_idx = table[prod_idx][symbol_to_loc[inverses[loc_to_symbol[c]]]]
-                        final_sym = loc_to_symbol[final_idx]
-                        if (final_sym not in symbol_to_class_rep) and (sym not in symbol_to_class_rep):
-                            new_class = set([sym, final_sym])
-                            classes[sym] = new_class
-                            symbol_to_class_rep[sym] = sym
-                            symbol_to_class_rep[final_sym] = sym
-                        elif final_sym in symbol_to_class_rep:
-                            rep = symbol_to_class_rep[final_sym]
-                            classes[rep].add(sym)
-                            symbol_to_class_rep[sym] = rep
-                        elif sym in symbol_to_class_rep:
-                            rep = symbol_to_class_rep[sym]
-                            classes[rep].add(final_sym)
-                            symbol_to_class_rep[final_sym] = rep
+                    prod_idx = table[c][loc]
+                    final_idx = table[prod_idx][symbol_to_loc[inverses[loc_to_symbol[c]]]]
+                    final_sym = loc_to_symbol[final_idx]
+                    if (final_sym not in symbol_to_class_rep) and (sym not in symbol_to_class_rep):
+                        new_class = set([sym, final_sym])
+                        classes[sym] = new_class
+                        symbol_to_class_rep[sym] = sym
+                        symbol_to_class_rep[final_sym] = sym
+                    elif final_sym in symbol_to_class_rep:
+                        rep = symbol_to_class_rep[final_sym]
+                        classes[rep].add(sym)
+                        symbol_to_class_rep[sym] = rep
+                    elif sym in symbol_to_class_rep:
+                        rep = symbol_to_class_rep[sym]
+                        classes[rep].add(final_sym)
+                        symbol_to_class_rep[final_sym] = rep
 
         class_list = []
         class_linear_index = dict()
@@ -96,7 +95,8 @@ class GroupAsTable(Group):
                         )
 
         _, e = int_list_gcd_and_lcd(orders)
-        p_min = 2*ceil(len(orders)**0.5)
+        # p > nc: Leverrier divides by k+1 for k < nc, so (k+1) % p != 0
+        p_min = max(2*ceil(len(orders)**0.5), nc + 1)
         p = find_prime(p_min, filter=lambda x: (x-1) % e == 0)
         _logger.info(f"LCD of orders = {e}")
         _logger.info(f"Need prime field of characteristic p >= {p_min} with p = 1 mod {e}")
@@ -228,6 +228,12 @@ class GroupAsTable(Group):
             {rep: i for i, (rep, cls_set) in enumerate(group.classes.items())}
         g = sum(cl_sizes)
         e_inv_in_F = F(e) ** -1
+
+        if cln == 1:
+            # trivial group: X = [[1]] (Tensor slicing collapses length-1 axes below)
+            X = Tensor(shape=(1, 1), entry_type=QP)
+            X[0, 0] = X.unit_entry
+            return X
 
         # Calculate the normalized eigen-vectors of the structure matrices in the number field
         V: Set[Tuple[FieldType, ...]] = set()
@@ -425,6 +431,8 @@ def calc_single_group_char(root: Optional[FieldType],
 
 
 # Sample group tables
+TrivialTable = [['E']]
+
 Cyclic3MultTable = [
     ['E', 'A', 'A2'],
     ['A', 'A2', 'E'],
@@ -510,6 +518,7 @@ C3vMultTable = [
 def run_samples(log_level=_logging.ERROR):
     _logging.basicConfig(level=log_level)
     groups = (
+        ("Trivial", TrivialTable),
         ("Cyclic 3", Cyclic3MultTable),
         ("Cyclic 4", Cyclic4MultTable),
         ("Cyclic 5", Cyclic5MultTable),

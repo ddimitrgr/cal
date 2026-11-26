@@ -24,6 +24,8 @@ def factor_int(n: int) -> Dict[int, int]:
 
 
 def int_list_gcd_and_lcd(li: List[int]) -> Tuple[int, int]:
+    if len(li) == 1:
+        return li[0], li[0]
     _, _, gcd = ext_euclid_algo_for_ints(li[0], li[1])
     lcd = (li[0]*li[1])//gcd
     for e in li[2:]:
